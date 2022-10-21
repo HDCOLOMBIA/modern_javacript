@@ -3,3 +3,7 @@ let a = 10;
     c = 'hola de nuevo'
     x = 'Spiderman'
     f = a + b
+
+// console.log(a);
+// console.log(a);
+// console.log(a);
