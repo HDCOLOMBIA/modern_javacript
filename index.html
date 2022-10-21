@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicios Lógica</title>
+</head>
+
+<body>
+    <!-- <script language="JavaScript">
+        prompt('¿Quieres saber si tu número es igual, mayor o igual que otro?');
+        let valor1 = prompt("Dame el valor 1", 0);
+        let valor2 = prompt("Dame el valor 2", 0);
+        if (valor1 == valor2){
+            prompt('El número ' + valor1 + ' y ' + valor2 + ' son iguales');
+        }        else if (valor1 > valor2){
+        prompt('El número ' + valor1 + ' es mayor al número ' + valor2);
+        }        else
+        prompt('El número ' + valor1 + ' es menor al número ' + valor2);
+    </script> -->
+    <script>
+        prompt('Enter si quieres saber los número son mayores, menores o iguales, solo números enteros')
+        let valor1 = isNaN(parseInt(prompt("Dame el valor 1", 0)));
+        let valor2 = isNaN(parseInt(prompt("Dame el valor 2", 0)));
+        while (valor1 == isNaN || valor2 == isNaN) {
+            console.log(valor1, valor2);
+            prompt('Ingresa un número entero')
+            if (valor1 == valor2) {
+                prompt('El número ' + valor1 + ' y ' + valor2 + ' son iguales');
+            } else if (valor1 > valor2) {
+                prompt('El número ' + valor1 + ' es mayor al número ' + valor2);
+            } else
+                prompt('El número ' + valor1 + ' es menor al número ' + valor2);
+        }
+        console.log(valor1);
+    </script>
+</body>
+
+</html>
