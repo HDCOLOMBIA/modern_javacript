@@ -1,7 +1,3 @@
-//pop up
-alert('Hola desde App.js')
-
-
 console.log(console.log('Hola. Mundo'));
 
 let a = 10,
