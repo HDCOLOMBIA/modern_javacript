@@ -1,0 +1,253 @@
+<?php
+
+namespace App\Http\Controllers\Services;
+
+use App\Activity;
+use App\ActivityActionDocument;
+use App\Client;
+use App\DebtorInsuranceWithoutReport;
+use App\Http\Controllers\ActionController;
+use App\Http\Controllers\Controller;
+use App\DebtorInsurance;
+use App\Mail\SendDocumentDataBase;
+use App\Service;
+use Carbon\Carbon;
+use DateTime;
+use DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
+use PDF;
+
+class DebtorController extends Controller
+{
+
+    public function form(Request $req, $cpath, $id)
+    {
+        $client   = Client::where('path', $cpath)->firstOrFail();
+        $activity = Activity::where('client_id', $client->id)->where('id', $id)->firstOrFail();
+        return view('services.debtors_insurance.form', ['activity' => $activity]);
+    }
+
+    public function save(Request $req, $cpath, $id)
+    {
+        $client   = Client::where('path', $cpath)->firstOrFail();
+        $activity = Activity::where('client_id', $client->id)->where('id', $id)->firstOrFail();
+
+        DB::beginTransaction();
+        try {
+            if ($activity->debtor == null) {
+                $debtor              = new DebtorInsurance;
+                $debtor->activity_id = $activity->id;
+            } else {
+                $debtor = $activity->debtor;
+            }
+            $debtor->prime_payment_type                   = $req->input('prime_payment_type');
+            $debtor->sinister_number                   = $req->input('sinister_number');
+            $debtor->sinister_date          = $req->input('sinister_date_submit');
+            $debtor->sinister_alert_date          = $req->input('sinister_alert_date_submit');
+            $debtor->age_claim          = $req->input('age_claim');
+            $debtor->amparo_affected          = $req->input('amparo_affected');
+            $debtor->claim_value          = $req->input('claim_value');
+            $debtor->remanent_value          = $req->input('remanent_value');
+            $debtor->regis_verify_date          = $req->input('regis_verify_date_submit');
+            $debtor->doc_cc          = $req->input('doc_cc');
+            $debtor->doc_certificate_unpaid          = $req->input('doc_certificate_unpaid');
+            $debtor->doc_rc_date          = $req->input('doc_rc_date');
+            $debtor->doc_state_cc          = $req->input('doc_state_cc');
+            $debtor->doc_clinical_history          = $req->input('doc_clinical_history');
+            $debtor->doc_pcl_rating          = $req->input('doc_pcl_rating');
+            $debtor->doc_bdua          = $req->input('doc_bdua');
+            $debtor->doc_other          = $req->input('doc_other');
+            $debtor->preli_value          = $req->input('preli_value');
+            $debtor->insurer_cliam_date          = $req->input('insurer_cliam_date_submit');
+            $debtor->insurer_state          = $req->input('insurer_state');
+            $debtor->nit_pay          = $req->input('nit_pay');
+            $debtor->name_pay          = $req->input('name_pay');
+            $debtor->plan_type          = $req->input('plan_type');
+            $debtor->payment_type          = $req->input('payment_type');
+            $debtor->beneficiaries          = $req->input('beneficiaries');
+            $debtor->payment_day_date          = $req->input('payment_day_date_submit');
+            $debtor->excel_report_date          = $req->input('excel_report_date_submit');
+            $debtor->report_month          = $req->input('report_month');
+            $debtor->billing_palig_date          = $req->input('billing_palig_date_submit');
+            $debtor->billing_palig_number          = $req->input('billing_palig_number');
+            $debtor->billing_global_value          = $req->input('billing_global_value');
+            $debtor->billing_prime_value          = $req->input('billing_prime_value');
+            $debtor->excel_payment_date          = $req->input('excel_payment_date_submit');
+            $debtor->excel_payment_value          = $req->input('excel_payment_value');
+            // news items debtor
+            $debtor->cause          = $req->input('cause');
+            $debtor->occurrence_city          = $req->input('occurrence_city');
+            $debtor->occurrence_department          = $req->input('occurrence_department');
+            $debtor->length_stay_day          = $req->input('length_stay_day');
+            $debtor->length_stay_month          = $req->input('length_stay_month');
+            $debtor->length_stay_year          = $req->input('length_stay_year');
+            $debtor->dwell_time          = $req->input('dwell_time');
+            $debtor->age_admission          = $req->input('age_admission');
+            $debtor->initial_insured_value          = $req->input('initial_insured_value');
+            $debtor->reserve_value          = $req->input('reserve_value');
+            $debtor->liquidation_value          = $req->input('liquidation_value');
+            $debtor->beneficiary_payment          = $req->input('beneficiary_payment');
+            $debtor->formalization_date          = $req->input('formalization_date_submit');
+            $debtor->status_remnant          = $req->input('status_remnant');
+            $debtor->value_paid_unpaid_balance          = $req->input('value_paid_unpaid_balance');
+            $debtor->remaining_beneficiary          = $req->input('remaining_beneficiary');
+            $debtor->remaining_paid_value          = $req->input('remaining_paid_value');
+            $debtor->remaining_payment_date          = $req->input('remaining_payment_date');
+            $debtor->objetion_cause          = $req->input('objetion_cause');
+//            dd($debtor->sinister_date, $debtor->sinister_alert_date, $debtor->regis_verify_date);
+            $debtor->save();
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollback();
+        }
+
+        return redirect("servicio/$id/debtors");
+    }
+
+    public function pdf(Request $req, $cpath, $id)
+    {
+        $client   = Client::where('path', $cpath)->firstOrFail();
+        $activity = Activity::where('client_id', $client->id)->where('id', $id)->firstOrFail();
+
+        $debtor              = new DebtorInsurance;
+        $debtor->activity_id = $activity->id;
+        $debtor->setRelation('activity', Activity::findOrFail($id));
+
+        $debtor->prime_payment_type                   = $req->input('prime_payment_type');
+        $debtor->sinister_number                   = $req->input('sinister_number');
+        $debtor->sinister_date          = $req->input('sinister_date_submit');
+        $debtor->sinister_alert_date          = $req->input('sinister_alert_date_submit');
+        $debtor->age_claim          = $req->input('age_claim');
+        $debtor->amparo_affected          = $req->input('amparo_affected');
+        $debtor->claim_value          = $req->input('claim_value');
+        $debtor->remanent_value          = $req->input('remanent_value');
+        $debtor->regis_verify_date          = $req->input('regis_verify_date_submit');
+        $debtor->doc_cc          = $req->input('doc_cc');
+        $debtor->doc_letter          = $req->input('doc_letter');
+        $debtor->doc_state          = $req->input('doc_state');
+        $debtor->doc_declaration          = $req->input('doc_declaration');
+        $debtor->sinister_beneficiaries          = $req->input('sinister_beneficiaries');
+        $debtor->preli_value          = $req->input('preli_value');
+        $debtor->insurer_cliam_date          = $req->input('insurer_cliam_date_submit');
+        $debtor->insurer_state          = $req->input('insurer_state');
+        $debtor->payment_day_date          = $req->input('payment_day_date');
+        $debtor->outlay_date          = $req->input('outlay_date');
+        $debtor->end_date          = $req->input('end_date');
+        $debtor->ramo          = $req->input('ramo');
+        $debtor->policy_number          = $req->input('policy_number');
+        $debtor->nit_taker         = $req->input('nit_taker');
+        $debtor->name_taker         = $req->input('name_taker');
+        $debtor->payment_freq         = $req->input('payment_freq');
+        $debtor->plan_type         = $req->input('plan_type');
+        $debtor->amount_approved         = $req->input('amount_approved');
+        $debtor->credit_prime_value         = $req->input('credit_prime_value');
+        $debtor->created_at = new DateTime();
+
+        $pdf = PDF::loadView('services.debtors_insurance.docs.debtors_insurance_pdf', ['activity' => $activity, 'debtor' => $debtor, 'watermark' => true]);
+
+        return $pdf->stream('preview.pdf');
+    }
+
+    public function debtorInsuranceWithoutReport() {
+        $debtor_insurance_without_report = DebtorInsuranceWithoutReport::query()->limit(15)->get();
+        $client = '';
+        $req = '';
+        foreach ($debtor_insurance_without_report as $debtor) {
+
+            $client = json_decode($debtor->client);
+            $req = $debtor->req;
+            $debtor->client = json_decode($debtor->client);
+
+            $activity = Activity::query()->find($debtor->activity_id);
+
+            $pdf = ActionController::generatePDF($activity, 'debtors_insurance', false);
+
+            $pdf->setEncryption($debtor->doc_number);
+
+            $pdf = $pdf->output();
+
+            Storage::disk('s3')
+                ->put("activity_action_document/debtors_insurance_{$debtor->activity_2_id}.pdf", $pdf);
+
+            $activityActionDocument                     = new ActivityActionDocument;
+            $activityActionDocument->activity_action_id = $debtor->activity_2_id;
+            $activityActionDocument->name               ='debtors_insurance';
+            $activityActionDocument->path               = "activity_action_document/debtors_insurance_{$debtor->activity_2_id}.pdf";
+            $activityActionDocument->save();
+
+            $this->debtorInsuranceEmails = [
+                'email' =>$debtor->email,
+                'doc_type' => $debtor->doc_type,
+                'doc_number' => $debtor->doc_number,
+                'credit_number' => $debtor->credit_number,
+                'first_name' => $debtor->first_name,
+                'last_name' => $debtor->last_name,
+                'path' => $activityActionDocument->path,
+                'activity_id' => $debtor->activity_id,
+                'client' => $debtor->client,
+                'req' => $debtor->req,
+                'activity_2_id' => $debtor->activity_2_id
+            ];
+            $url_path = 'https://renapp-prod.s3.us-east-2.amazonaws.com/'.$activityActionDocument->path ;
+            $this->sendEmailDebtorInsurance($this->debtorInsuranceEmails);
+            DebtorInsuranceWithoutReport::query()->where('id', $debtor->id)->delete();
+            $listComplete[] = array('service_id' => $activity->id, 'nro_documento' => $debtor->doc_number, 'nombre_afiliado' => $debtor->first_name.' '.$debtor->last_name, 'url_path' => $url_path, 'nro_credit' => $debtor->credit_number);
+        }
+        if (count($debtor_insurance_without_report) > 0){
+            $mailSent = new SendDocumentDataBase(
+                'jaortegon@renconsultores.com.co,palig_excelcredit@renconsultores.com.co',
+                'Reporte cargue colocación nuevos créditos - '.Carbon::now()->toDateString(),
+                'vida_excelcredit_palig@renconsultores.com.co',
+                'RENAPP',
+                ['listComplete' => $listComplete],
+                'vida_excelcredit_palig@renconsultores.com.co',
+                [],
+                'debtors_insurance_charge_mail',
+                $client,
+                $req,
+                null,
+                null,
+                Service::SERVICE_DEBTORS_INSURANCE_EXCEL);
+            $mailSent->sendMail();
+
+            $mailSent = new SendDocumentDataBase(
+                'vida_excelcredit_palig@renconsultores.com.co, jaortegon@renconsultores.com.co, vlacosta@renconsultores.com.co, wdsoler@renconsultores.com.co',
+                'Enlaces a documentos generados cargue colocación nuevos créditos - '.Carbon::now()->toDateString(),
+                'vida_excelcredit_palig@renconsultores.com.co',
+                'RENAPP',
+                ['listComplete' => $listComplete],
+                'vida_excelcredit_palig@renconsultores.com.co',
+                [],
+                'debtors_insurance_docs_mail',
+                $client,
+                $req,
+                null,
+                null,
+                Service::SERVICE_DEBTORS_INSURANCE_EXCEL);
+            $mailSent->sendMail();
+        }
+    }
+
+    private function sendEmailDebtorInsurance($data)
+    {
+        $mailSent = new SendDocumentDataBase(
+            $data['email'].',vida_excelcredit_palig@renconsultores.com.co',
+            'Certificado de Seguro - Pan - American Life de Colombia Compañía de Seguros S.A. - ExcelCredit',
+            'vida_excelcredit_palig@renconsultores.com.co',
+            'RENAPP',
+            ['doc_type'=> $data['doc_type'], 'doc_number' => $data['doc_number'], 'name' => $data['first_name'].' '.$data['last_name'], 'credit_number'=>$data['credit_number']],
+            'vida_excelcredit_palig@renconsultores.com.co',
+            [['type' => 'pdf', 'path' => $data['path'], 'name' => "certificado de seguro ".$data['activity_id'].".pdf"]],
+            'debtors_insurance_mail',
+            $data['client'],
+            $data['req'],
+            $data['activity_id'],
+            $data['activity_2_id'],
+            Service::SERVICE_DEBTORS_INSURANCE_EXCEL);
+        $mailSent->sendMail();
+    }
+}

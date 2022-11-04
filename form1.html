@@ -1,0 +1,735 @@
+@extends('layouts.main')
+
+@section('title', 'SEGURO DEUDORES')
+
+@section('menu')
+    @parent
+@endsection
+
+@section('content')
+    <div class="ui basic segment">
+        <h1 class="ui header">
+            SEGURO DEUDORES
+            <div class="sub header">Campos con <span style="color: red;" class="required">*</span> obligatorios.</div>
+        </h1>
+        <form autocomplete="off" action="{{secure_url("servicio/{$activity->id}/debtors/save")}}" id="dictamen"
+              method="post" class="ui small form">
+            <div class="ui secondary segment">
+                <div class="ui three columns grid">
+                    <div class="column">
+                        <b>Identificación:</b> {{$activity->affiliate->doc_type}} {{$activity->affiliate->doc_number}}
+                    </div>
+                    <div class="column"><b>Nombre:</b> <a
+                                href="{{secure_url('afiliado/' . $activity->affiliate_id)}}">{{$activity->affiliate->full_name}}</a>
+                    </div>
+                    <div class="column"><b>Actividad:</b> <a
+                                href="{{secure_url('servicio/' . $activity->id)}}">{{$activity->service->name}}</a>
+                    </div>
+                    <div class="column"><b>Nro. Dictamen:</b> {{$activity->id}}</div>
+                    <div class="column"><b>Fecha solicitud:</b> {{$activity->created_at->formatLocalized('%B %d, %Y')}}
+                    </div>
+                </div>
+            </div>
+            <div class="ui styled fluid accordion">
+                <div class="title"><i class="dropdown icon"></i> Datos del asegurado</div>
+                <div class="content">
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>&nbsp;Tipo identificación</label>
+                            <input name="id_type" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->id_type : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Número de identificación </label>
+                            <input name="id_number" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->id_number : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Nombres y Apellidos</label>
+                            <input name="name_lastname" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->name_lastname : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Genero</label>
+                            <input name="gender" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->gender : ''}}"/>
+                        </div>
+                    </div>
+                    <div class="three fields">
+                        <div class="four wide field">
+                            <label>Fecha de nacimiento</label>
+                            <input name="birthday" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->birthday : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>NIT Pagaduría</label>
+                            <input name="nit_pay" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->nit_pay : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Nombre Pagaduría</label>
+                            <input name="name_pay" type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->name_pay : ''}}"/>
+                        </div>
+                    </div>
+                </div>
+                <!-- POLICY DATA -->
+                <div class="title"><i class="dropdown icon"></i>Datos de la Poliza</div>
+                <div class="content">
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>NIT Tomador</label>
+                            <input name="nit_taker" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->nit_taker : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Nombre Tomador</label>
+                            <input name="name_taker" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->name_taker : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>No. Póliza</label>
+                            <input name="policy_number" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->policy_number : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Tipo de plan</label>
+                            <input name="plan_type" type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->plan_type : ''}}"/>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Ramo</label>
+                            <input name="ramo" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->ramo : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Valor Prima De Seguro</label>
+                            <input name="secure_prime_value" type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->secure_prime_value : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha Vencimiento Prima</label>
+                            <input name="expiration_date" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->expiration_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Frecuencia de pago</label>
+                            <input name="payment_freq" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->payment_freq : ''}}"/>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- END: POLICY DATA -->
+                <!-- CREDIT DATA -->
+                <div class="title"><i class="dropdown icon"></i>Datos del crédito</div>
+                <div class="content">
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Nro. Crédito</label>
+                            <input name="credit_number" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->credit_number : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>ID Retanqueo</label>
+                            <input name="id_rank" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->id_rank : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Monto Aprobado</label>
+                            <input name="amount_approved" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->amount_approved : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Monto Solicitado</label>
+                            <input name="requested_amount" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->requested_amount : ''}}"/>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Valor Prima De Seguro</label>
+                            <input name="credit_prime_value" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->credit_prime_value : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha Desembolso</label>
+                            <input name="outlay_date" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->outlay_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha de terminación / vencimiento crédito</label>
+                            <input name="end_date" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->end_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Plazo (Meses)</label>
+                            <input name="time_limit" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->time_limit : ''}}"/>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Estado Credito</label>
+                            <input name="credit_state" readonly type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->credit_state : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Saldo Capital Al Último Corte</label>
+                            <input name="capital_residue" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->capital_residue : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Tipo de pago</label>
+                            <input name="payment_type" type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->payment_type : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Beneficiarios</label>
+                            <textarea name="beneficiaries"
+                                      rows="6">{{$activity->debtor ? $activity->debtor->beneficiaries : ''}}</textarea>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Cuota número</label>
+                            <input name="quota_number" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->quota_number : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Cuotas en mora</label>
+                            <input name="quota_in_arrears" readonly type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->quota_in_arrears : ''}}"/>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: CREDIT DATA -->
+
+                <!-- BILLING -->
+                <div class="title"><i class="dropdown icon"></i>Facturación Prima</div>
+                <div class="content">
+                    <div class="five fields">
+                        <div class="four wide field">
+                            <label>Fecha Reporte ExcelCredit - PALIG</label>
+                            <input name="excel_report_date" type="text" class="datepicker"
+                                   data-value="{{$activity->debtor ? $activity->debtor->excel_report_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Mes de reporte</label>
+                            <input name="report_month" type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->report_month : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha Factura PALIG</label>
+                            <input name="billing_palig_date" type="text" class="datepicker"
+                                   data-value="{{$activity->debtor ? $activity->debtor->billing_palig_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>No. Factura PALIG</label>
+                            <input name="billing_palig_number" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->billing_palig_number : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Valor Factura global</label>
+                            <input name="billing_global_value" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->billing_global_value : ''}}"/>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Valor factura Prima - Credito individual</label>
+                            <input name="billing_prime_value" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->billing_prime_value : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Tipo de pago prima</label>
+                            <div class="ui fluid selection dropdown">
+                                <input name="prime_payment_type" type="hidden"
+                                       value="{{$activity->debtor ? $activity->debtor->prime_payment_type : ''}}">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Seleccione uno</div>
+                                <div class="menu">
+                                    <div class="item" data-value="Mensual">Mensual</div>
+                                    <div class="item" data-value="Anticipada">Anticipada</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha de Pago ExcelCredit</label>
+                            <input name="excel_payment_date" type="text" class="datepicker"
+                                   data-value="{{$activity->debtor ? $activity->debtor->excel_payment_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Valor Pagado ExcelCredit</label>
+                            <input name="excel_payment_value" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->excel_payment_value : ''}}"/>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: BILLING -->
+                <!-- SINISTER DATA -->
+                <div class="title"><i class="dropdown icon"></i>Datos del siniestro</div>
+                <div class="content">
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Nó. Siniestro - Aseguradora</label>
+                            <input name="sinister_number" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->sinister_number : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha de ocurrencia del siniestro</label>
+                            <input name="sinister_date" type="text" class="datepicker"
+                                   data-value="{{$activity->debtor ? $activity->debtor->sinister_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha de aviso del siniestro</label>
+                            <input name="sinister_alert_date" type="text" class="datepicker"
+                                   data-value="{{$activity->debtor ? $activity->debtor->sinister_alert_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Edad a la fecha de reclamación</label>
+                            <input name="age_claim" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->age() : ''}}"/>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Amparo afectado (Vida/ITP)</label>
+                            <div class="ui fluid selection dropdown">
+                                <input name="amparo_affected" type="hidden"
+                                       value="{{$activity->debtor ? $activity->debtor->amparo_affected : ''}}">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Seleccione uno</div>
+                                <div class="menu">
+                                    <div class="item" data-value="Vida">Vida</div>
+                                    <div class="item" data-value="ITP">ITP</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="four wide field">
+                            <label>Valor reclamado(Saldo Insoluto de deuda)</label>
+                            <input name="claim_value" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->claim_value : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Valor remanente</label>
+                            <input name="remanent_value" type="number" readonly/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha verificación registraduría</label>
+                            <input name="regis_verify_date" type="text" class="datepicker"
+                                   data-value="{{$activity->debtor ? $activity->debtor->regis_verify_date : ''}}"/>
+                        </div>
+                    </div>
+
+                    <!-- DOCUMENTS -->
+                    <div class="inline four fields" style="padding-top: 1rem; padding-bottom: 1rem;">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                <input name="doc_cc" type="checkbox"
+                                       value="1" {{$activity->debtor && $activity->debtor->doc_cc ? 'checked' : ''}}>
+                                <label>Copia CC</label>
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                <input name="doc_certificate_unpaid" type="checkbox"
+                                       value="1" {{$activity->debtor && $activity->debtor->doc_certificate_unpaid ? 'checked' : ''}}>
+                                <label>Certificado Saldo Insoluto</label>
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                <input name="doc_rc_date" type="checkbox"
+                                       value="1" {{$activity->debtor && $activity->debtor->doc_rc_date ? 'checked' : ''}}>
+                                <label>RC Defunción</label>
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                <input name="doc_state_cc" type="checkbox"
+                                       value="1" {{$activity->debtor && $activity->debtor->doc_state_cc ? 'checked' : ''}}>
+                                <label>Estado Cedula Registraduría</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="inline four fields" style="padding-top: 1rem; padding-bottom: 1rem;">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                <input name="doc_clinical_history" type="checkbox"
+                                       value="1" {{$activity->debtor && $activity->debtor->doc_clinical_history ? 'checked' : ''}}>
+                                <label>Historia Clínica</label>
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                <input name="doc_pcl_rating" type="checkbox"
+                                       value="1" {{$activity->debtor && $activity->debtor->doc_pcl_rating ? 'checked' : ''}}>
+                                <label>Calificación PCL</label>
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                <input name="doc_bdua" type="checkbox"
+                                       value="1" {{$activity->debtor && $activity->debtor->doc_bdua ? 'checked' : ''}}>
+                                <label>Consulta BDUA</label>
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <label>Otro</label>
+                            <input name="doc_other" type="text"
+                                   value="{{$activity->debtor ? $activity->debtor->doc_other : ''}}"/>
+                        </div>
+                    </div>
+                    <!-- END: DOCUMENTS -->
+                    <!-- SINISTER DATA -->
+                    <div class="five fields">
+                        <div class="four wide field">
+                            <label>Beneficiarios</label>
+                            <textarea name="sinister_beneficiaries"
+                                      rows="6">{{$activity->debtor ? $activity->debtor->sinister_beneficiaries : ''}}</textarea>
+                        </div>
+                        <div class="four wide field">
+                            <label>Valor preliquidación</label>
+                            <input name="preli_value" type="number"
+                                   value="{{$activity->debtor ? $activity->debtor->preli_value : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha de radicación siniestro Aseguradora</label>
+                            <input name="insurer_cliam_date" class="datepicker"
+                                   value="{{$activity->debtor ? $activity->debtor->insurer_cliam_date : ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Estado Aseguradora</label>
+                            <div class="ui fluid selection dropdown">
+                                <input name="insurer_state" type="hidden"
+                                       value="{{$activity->debtor ? $activity->debtor->insurer_state : ''}}">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Seleccione uno</div>
+                                <div class="menu">
+                                    <div class="item" data-value="PAGADO">PAGADO</div>
+                                    <div class="item" data-value="OBJETADO">OBJETADO</div>
+                                    <div class="item" data-value="SOL DOCUMENTOS">SOL DOCUMENTOS</div>
+                                    <div class="item" data-value="EN TRAMITE">EN TRAMITE</div>
+                                    <div class="item" data-value="PENDIENTE">PENDIENTE</div>
+                                    <div class="item" data-value="ANULADO">ANULADO</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha pago u objeción Aseguradora
+                            </label>
+                            <input name="payment_day_date" class="datepicker"
+                                   value="{{$activity->debtor ? $activity->debtor->payment_day_date : ''}}"/>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Causas</label>
+                            <input name="cause" type="text"
+                            value="{{$activity->debtor ? $activity->debtor->cause: ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Ciudad de Ocurrencia</label>
+                            <input name="occurrence_city" type="text"
+                            value="{{$activity->debtor ? $activity->debtor->occurrence_city:''}}"/>
+                        </div>
+                        <div class="four wide required field">
+                            <label>Departamento de Ocurrencia</label>
+                            <div id="departments" class="ui selection dropdown">
+                                <input type="hidden" name="occurrence_department" value="{{$activity->debtor ? $activity->debtor->occurrence_department: ''}}">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Seleccione uno</div>
+                                <div class="menu"></div>
+                            </div>
+                        </div>
+{{--                        <div class="four wide required field">--}}
+{{--                            <label>Municipio</label>--}}
+{{--                            <div id="municipalities" class="ui selection dropdown">--}}
+{{--                                <input type="hidden" name="municipality">--}}
+{{--                                <i class="dropdown icon"></i>--}}
+{{--                                <div class="default text">Seleccione uno</div>--}}
+{{--                                <div class="menu"></div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+                        <div class="four wide field">
+                            <label>Tiempo de Permanencia (meses)</label>
+                            <input name="dwell_time" type="text"
+                            value="{{$activity->debtor->outlay_date && $activity->debtor->sinister_date ?  Carbon\Carbon::parse($activity->debtor->outlay_date)->diffInMonths($activity->debtor->sinister_date) . ' Meses' : ''}}" readonly/>
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Edad al ingreso</label>
+                            <input name="age_admission" type="text"
+                                   value="{{$activity->debtor->outlay_date && $activity->debtor->birthday ?  Carbon\Carbon::parse($activity->debtor->outlay_date)->diffInYears($activity->debtor->birthday) . ' Años' : ''}}" readonly/>
+                        </div>
+                        <div class="four wide field">
+                            <label> Valor Asegurado Inicial</label>
+                            <input name="initial_insured_value" type="number"
+                            value="{{$activity->debtor ? $activity->debtor->initial_insured_value: ''}}" />
+                        </div>
+                        <div class="four wide field">
+                            <label>Valor Reserva</label>
+                            <input name="reserve_value" type="number"
+                            value="{{$activity->debtor ? $activity->debtor->reserve_value: ''}}" />
+                        </div>
+                        <div class="four wide field">
+                            <label>Valor Liquidado</label>
+                            <input name="liquidation_value" type="number"
+                            value="{{$activity->debtor ? $activity->debtor->liquidation_value: ''}}" />
+                        </div>
+                    </div>
+                    <div class="four fields">
+                        <div class="four wide field">
+                            <label>Beneficiario de pago</label>
+                            <div class="ui fluid selection dropdown">
+                                <input name="beneficiary_payment" type="hidden"
+                                       value="{{$activity->debtor ? $activity->debtor->beneficiary_payment: ''}}">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Seleccione uno</div>
+                                <div class="menu">
+                                    <div class="item" data-value="EXCELCREDIT">EXCELCREDIT</div>
+                                    <div class="item" data-value="IRIS">IRIS</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="four wide field">
+                            <label>Fecha de formalización</label>
+                            <input name="formalization_date" type="text" class="datepicker"
+                                   value="{{$activity->debtor ? $activity->debtor->formalization_date: ''}}"/>
+                        </div>
+                        <div class="four wide field">
+                            <label>Estado de Remanente</label>
+                            <div class="ui fluid selection dropdown">
+                                <input name="status_remnant" type="hidden"
+                                       value="{{$activity->debtor ? $activity->debtor->status_remnant: ''}}">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Seleccione uno</div>
+                                <div class="menu">
+                                    <div class="item" data-value="DOCUMENTOS">DOCUMENTOS</div>
+                                    <div class="item" data-value="OBJETADO">OBJETADO</div>
+                                    <div class="item" data-value="PAGADO">PAGADO</div>
+                                    <div class="item" data-value="NO APLICA">NO APLICA</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: SINISTER DATA -->
+            </div>
+            <div class="ui basic segment">
+                <div class="ui error message"></div>
+                <div class="fields">
+                    <div class="four wide field">
+                        <button class="ui green fluid button"><i class="save icon"></i> Guardar</button>
+                    </div>
+                    <div class="six wide field">
+                        @if($activity->debtor->policy_number === 5191 || $activity->debtor->policy_number === 5246 || $activity->debtor->policy_number === 5271 || $activity->debtor->policy_number === 5303)
+                            <a href="{{secure_url('/servicio/' . $activity->id . '/debtors/pdf')}}"
+                               class="ui basic small button" target="_blank"
+                               onclick="event.preventDefault(); generatePDF();">
+                                <i class="file pdf outline red icon"></i> Vista previa
+                            </a>
+                        @else
+                            <div class="ui basic medium red button">
+                                <i class="low vision icon"></i>Vista previa no diponible
+                            </div>
+                        @endif
+                        <a href="{{secure_url('/servicio/' . $activity->id)}}" class="ui basic small button"><i
+                                    class="arrow left icon"></i> Volver a la actividad</a>
+                    </div>
+                </div>
+            </div>
+            {{csrf_field()}}
+        </form>
+    </div>
+
+    <style type="text/css">
+        .ui.toggle.checkbox input:checked ~ .box:before,
+        .ui.toggle.checkbox input:checked ~ .coloring.orange:before {
+            background: rgb(242, 181, 28) !important;
+        }
+
+        .ui.toggle.checkbox input:checked ~ .coloring.white:before {
+            background: #FFFFFF !important;
+        }
+
+        .ui.grid .column {
+            padding: 0.5rem 1rem !important;
+        }
+
+        @unless($activity->pcl && ($activity->pcl->sender == 5 || $activity->pcl->sender == 8))
+	.sender .field {
+            display: none;
+        }
+
+        @endunless
+	.ear.field {
+            display: none;
+        }
+
+        .msp.field {
+            display: none;
+        }
+
+        .ui.accordion .title {
+            text-transform: uppercase;
+        }
+
+        .field > h3 {
+            text-align: center;
+            margin-top: 1.25rem;
+        }
+
+        .ui.search > .results {
+            width: 30rem;
+        }
+
+        .ui.search > .results .result .title {
+            padding: 0 !important;
+            border: none !important;
+            text-transform: none;
+        }
+
+        .ui.search > .results .result .content {
+            padding: 0 !important;
+        }
+
+        th {
+            text-align: center !important;
+        }
+    </style>
+    <script type="text/javascript">
+        var generatePDF = function () {
+            $('form#dictamen').attr('target', '_blank');
+            $('form#dictamen').attr('action', '{{secure_url('/servicio/' . $activity->id . '/debtors/pdf')}}');
+            $('form#dictamen').submit();
+            $('form#dictamen').removeAttr('target');
+            $('form#dictamen').attr('action', '{{secure_url('/servicio/' . $activity->id . '/debtors/save')}}');
+            return false;
+        };
+
+        function restar() {
+            var amount_approved = parseInt($("input[name='amount_approved']").val());
+            var claim_value = parseInt($("input[name='claim_value']").val());
+
+            $("input[name='remanent_value']").val(amount_approved - claim_value);
+
+        };
+        $("input[name='claim_value']").change(function () {
+            restar();
+        });
+        var cie10 = [];
+        $(document).ready(function () {
+            $('.ui.accordion .ui.grid .row').css('padding-top', 0);
+            $('.ui.accordion .ui.grid .column').css('padding-top', 0);
+            $('.ui.accordion').accordion({
+                exclusive: false
+            });
+
+            restar();
+
+            $('form .ui.dropdown').dropdown({
+                forceSelection: false
+            });
+            $('form .datepicker').pickadate({
+                selectYears: 250,
+                selectMonths: true,
+                // max: new Date(),
+                formatSubmit: 'yyyy-mm-dd',
+                format: 'mmm dd, yyyy'
+            });
+
+            var colombia = {};
+            $.getJSON('/js/colombia.json', function(json) {
+                colombia = json;
+                for (var i = 0; i < colombia.length; i++) {
+                    $("#departments .menu").append('<div class="item" data-value="' + colombia[i].code + '">' + colombia[i].name + '</div>');
+                }
+
+                var department = $("#departments").dropdown('get value');
+
+                for (var i = 0; i < colombia.length; i++) {
+                    if (department == colombia[i].code) {
+                        for (var j = 0; j < colombia[i].municipalities.length; j++) {
+                            var mun = colombia[i].municipalities[j];
+                            $("#municipalities .menu").append('<div class="item" data-value="' + mun.code + '">' + mun.name + '</div>');
+                        }
+                    }
+                }
+
+                $("#municipalities, #departments").dropdown({
+                    sortSelect: false,
+                    forceSelection: false
+                });
+
+                $("#departments").change(function() {
+                    var department = $(this).dropdown('get value');
+
+                    $("#municipalities").dropdown('clear');
+                    $("#municipalities .menu").empty();
+
+                    for (var i = 0; i < colombia.length; i++) {
+                        if (department == colombia[i].code) {
+                            for (var j = 0; j < colombia[i].municipalities.length; j++) {
+                                var mun = colombia[i].municipalities[j];
+                                $("#municipalities .menu").append('<div class="item" data-value="' + mun.code + '">' + mun.name + '</div>');
+                            }
+
+                            $("#municipalities input").val(colombia[i].municipalities[0].code);
+                        }
+                    }
+
+                    $("#municipalities").dropdown({
+                        sortSelect: false,
+                        forceSelection: false
+                    });
+                });
+            });
+            $('form#dictamen').form();
+            $('form .ui.dropdown').dropdown({
+                forceSelection: false
+            });
+
+            $.getJSON('/js/cie10.json', function (json) {
+                cie10 = json;
+                $('form .ui.search.code').search({
+                    source: cie10,
+                    fields: {
+                        title: 'COD',
+                        description: 'DESCRIPTION'
+                    },
+                    searchFields: ['COD', 'DESCRIPTION'],
+                    regExp: {
+                        escape: /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,
+                        beginsWith: ''
+                    },
+                    showNoResults: true,
+                    maxResults: 250,
+                    onSelect: function (result, response) {
+                        $(this).parents('.fields').find('input.description').val(result.DESCRIPTION);
+                    }
+                });
+            });
+
+            $('form input').keydown(function (event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+
+            @if (Auth::user()->isViewer())
+            $('.datepicker').pickadate('picker').stop();
+            $('#dictamen .ui.search input').attr('disabled', 'disabled');
+            $('#dictamen input, #dictamen textarea').attr('readonly', 'readonly');
+            $('#dictamen .ui.dropdown').addClass('disabled');
+            $('#dictamen .button').remove();
+            @endif
+        });
+    </script>
+@endsection
