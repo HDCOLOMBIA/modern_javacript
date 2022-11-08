@@ -11,10 +11,8 @@
 // console.log(nombre);
 
 // String texto
-// Tipo
-// nombre = "Tía Maya";
-// nombre = 'Tía Maya';
-
+// nombre = "Tía May";
+// nombre = 'Tía May';
 // console.log(typeof nombre);
 
 // nombre  = 132;
@@ -24,14 +22,17 @@
 // let esMarvel = false;
 // console.log(typeof esMarvel);
 
-// Números
+// // Números
 // let edad = 33;
+// console.log(edad);
 // console.log(typeof edad);
 
 // edad = 33.001;
-// log(typeof edad);
+// console.log(edad);
+// console.log(typeof edad);
 
 // Camel Case  ejemplo; elPoderDeSpiderman
+
 
 // undefined , sin valor
 // let superPoder;
