@@ -1,5 +1,5 @@
 // Largo del array
-let juegos = ['Halo','Tomb Raider', 'God of war', 'Left4Dead'];
+let juegos = ['Halo', 'Tomb Raider', 'God of war', 'Left4Dead'];
 // console.log('Largo: ', juegos.length);
 
 // let primero = juegos[0];
@@ -38,5 +38,30 @@ let juegos = ['Halo','Tomb Raider', 'God of war', 'Left4Dead'];
 // Buscar la posición de un elemento #-1 es que no se encuentra el elemento, tambíen es Case Sensitive
 // let metroIndex = juegos.indexOf('Left4Dead');
 // console.log({metroIndex});
+
+
+//  /**get Array[@@species]**/
+
+console.log(Array[Symbol.species]);
+class MyArray extends Array {
+    // Overwrite MyArray species to the parent Array constructor
+    static get [Symbol.species]() { return Array; }
+}
+console.log(MyArray);
+
+// ejemplo 2
+class Array1 extends Array {
+    static get [Symbol.species]() { return Array; }
+}
+
+const a = new Array1(1, 2, 3);
+const mapped = a.map(x => x * x);
+
+console.log(mapped instanceof Array1);
+// expected output: false
+
+console.log(mapped instanceof Array);
+  // expected output: true
+
 
 // TODO: Referencias
